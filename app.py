@@ -1,56 +1,62 @@
 import streamlit as st
+from streamlit_option_menu import option_menu
 
-# Página inteira
 st.set_page_config(page_title="IA Soccer Analyse Pro", layout="wide")
 
-# Sidebar com logo e navegação
-st.sidebar.image("https://i.imgur.com/XhL3SV2.png", width=200)  # Substitua pela URL do logo da IA Soccer
-st.sidebar.title("IA Soccer Analyse Pro")
+# Sidebar com menu moderno
+with st.sidebar:
+    selected = option_menu(
+        menu_title="IA Soccer Analyse Pro",  # título no topo da sidebar
+        options=[
+            "Dashboard", 
+            "Jogadores", 
+            "Sessão de Teste", 
+            "Testes Técnicos", 
+            "Análises Avançadas", 
+            "Relatórios"
+        ],
+        icons=["bar-chart", "person", "clipboard-check", "dribbble", "cpu", "file-earmark-text"],
+        menu_icon="cast",  
+        default_index=0,
+        styles={
+            "container": {"padding": "5px", "background-color": "#f0f2f6"},
+            "icon": {"color": "blue", "font-size": "18px"}, 
+            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"5px"},
+            "nav-link-selected": {"background-color": "#4A69BD"},
+        }
+    )
 
-menu = st.sidebar.selectbox(
-    "Menu Principal",
-    [
-        "Dashboard",
-        "Jogadores",
-        "Sessão de Teste",
+# Submenu condicional
+if selected == "Testes Técnicos":
+    submenu = st.selectbox("Escolha o teste:", [
         "Teste Condução (Illinois)",
         "Teste de Passe",
         "Remate",
-        "Massa Muscular",
         "Agilidade",
         "Sprint",
         "Reação",
+        "Massa Muscular"
+    ])
+    st.markdown(f"### {submenu}")
+
+elif selected == "Análises Avançadas":
+    submenu = st.selectbox("Escolha a análise:", [
         "Biomecânica IA",
         "Análise de Jogo",
         "Avaliação Mental",
-        "Risco de Lesão",
+        "Risco de Lesão"
+    ])
+    st.markdown(f"### {submenu}")
+
+elif selected == "Relatórios":
+    submenu = st.selectbox("Tipo de relatório:", [
         "Relatório Individual",
         "Relatório de Sessão",
         "Comparações por Idade"
-    ]
-)
+    ])
+    st.markdown(f"### {submenu}")
 
-st.markdown(f"## {menu}")
+else:
+    st.markdown(f"## {selected}")
+    st.success("Bem-vindo ao módulo selecionado.")
 
-# Exibição condicional (por enquanto só uma frase por menu para testar)
-if menu == "Dashboard":
-    st.success("Bem-vindo ao Painel IA Soccer")
-elif menu == "Jogadores":
-    st.info("Gestão de Jogadores")
-elif menu == "Sessão de Teste":
-    st.info("Inicie uma nova sessão de testes técnicos")
-elif menu == "Teste Condução (Illinois)":
-    st.warning("Aqui será o módulo Illinois")
-elif menu == "Teste de Passe":
-    st.warning("Aqui será o módulo de Passe")
-elif menu == "Remate":
-    st.warning("Aqui será o módulo de Remate")
-elif menu == "Massa Muscular":
-    st.info("Aqui será o módulo de Análise Corporal")
-# ... e assim por diante
-
-
-elif menu == "🔬 Biomecanique vidéo":
-    page_biomeca()
-elif menu == "📝 Rapport Global":
-    page_rapport()
