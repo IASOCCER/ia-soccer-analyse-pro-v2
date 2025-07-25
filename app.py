@@ -1,104 +1,96 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from streamlit_option_menu import option_menu
 
-# ----- ESTILO GLOBAL -----
 st.set_page_config(page_title="IA Soccer Analyse Pro", layout="wide")
 
-st.markdown("""
-    <style>
-    body {
-        background-color: #F8F9FA;
-    }
-    .main {
-        background-color: white;
-        padding: 2rem;
-        border-radius: 10px;
-    }
-    .card {
-        background-color: #ffffff;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-    .card h2 {
-        font-size: 26px;
-        margin-bottom: 0.3rem;
-        color: #003366;
-    }
-    .card p {
-        font-size: 15px;
-        color: #666;
-    }
-    .menu-title {
-        font-size: 24px;
-        font-weight: bold;
-        color: #003366;
-        margin-bottom: 1rem;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# ---- Funções auxiliares ----
+def carregar_dados():
+    try:
+        return pd.read_csv("dados_jogadores.csv")
+    except:
+        return pd.DataFrame(columns=["Nome", "Idade", "Altura", "Peso", "Categoria"])
 
-# ----- MENU LATERAL -----
-menu = st.sidebar.radio("Menu", ["Dashboard", "Jogadores", "Testes Técnicos", "Relatórios"])
+def salvar_dados(df):
+    df.to_csv("dados_jogadores.csv", index=False)
 
-# ----- PÁGINA DASHBOARD -----
+# ---- Sidebar com menu ----
+with st.sidebar:
+    menu = option_menu(
+        menu_title="IA Soccer",
+        options=["Dashboard", "Jogadores", "Sessão de Testes", "Relatórios"],
+        icons=["house", "people", "clipboard-data", "bar-chart"],
+        default_index=0,
+        styles={
+            "container": {"padding": "5px", "background-color": "#000814"},
+            "icon": {"color": "white", "font-size": "20px"},
+            "nav-link": {"color": "white", "font-size": "18px", "text-align": "left"},
+            "nav-link-selected": {"background-color": "#003566"},
+        }
+    )
+
+# ---- DASHBOARD ----
 if menu == "Dashboard":
-    st.markdown("<h1 style='color: #003366;'>IA Soccer Analyse Pro - Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<div class='main'>", unsafe_allow_html=True)
-
+    st.title("📊 Painel Principal - IA Soccer Analyse Pro")
     col1, col2, col3 = st.columns(3)
+
     with col1:
-        st.markdown("""
-            <div class='card'>
-                <h2>25</h2>
-                <p>Jogadores Testados</p>
-            </div>
-        """, unsafe_allow_html=True)
-
+        st.metric("👤 Jogadores Cadastrados", "25")
     with col2:
-        st.markdown("""
-            <div class='card'>
-                <h2>87%</h2>
-                <p>Testes Concluídos</p>
-            </div>
-        """, unsafe_allow_html=True)
-
+        st.metric("🧪 Testes Realizados", "122")
     with col3:
-        st.markdown("""
-            <div class='card'>
-                <h2>12</h2>
-                <p>Planos Gerados</p>
-            </div>
-        """, unsafe_allow_html=True)
+        st.metric("📅 Último Teste", "23/07/2025")
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.subheader("Últimos Testes Registrados")
+    st.markdown("---")
+    st.subheader("🔍 Últimos Resultados")
+    st.dataframe({
+        "Nome": ["Lucas", "João", "Tracy"],
+        "Teste": ["Agilidade", "Passe", "Remate"],
+        "Nota": ["Muito Bom", "Bom", "A Melhorar"],
+        "Data": ["22/07/2025", "21/07/2025", "20/07/2025"]
+    })
 
-    dados = {
-        "Nome do Jogador": ["Lucas E.", "Tracy M.", "Nico S."],
-        "Teste": ["Sprint", "Tir", "Agilité"],
-        "Data": [datetime.today().date()] * 3,
-        "Resultado": ["8.2s", "19 km/h", "17.4s"]
-    }
-    df = pd.DataFrame(dados)
-    st.dataframe(df)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ----- PÁGINA JOGADORES -----
+# ---- JOGADORES ----
 elif menu == "Jogadores":
-    st.markdown("<h1 class='menu-title'>Base de Dados dos Jogadores</h1>", unsafe_allow_html=True)
-    st.info("⚙️ Esta área será usada para registrar, editar e visualizar os dados completos dos jogadores.")
+    st.title("📋 Base de Dados de Jogadores")
+    dados = carregar_dados()
 
-# ----- PÁGINA TESTES TÉCNICOS -----
-elif menu == "Testes Técnicos":
-    st.markdown("<h1 class='menu-title'>Testes Técnicos</h1>", unsafe_allow_html=True)
-    st.warning("🔧 Em desenvolvimento: testes como Passe, Condução, Sprint, Tir, Agilité, Réaction, etc.")
+    with st.expander("➕ Adicionar Novo Jogador"):
+        nome = st.text_input("Nome completo")
+        idade = st.number_input("Idade", 5, 25, step=1)
+        altura = st.number_input("Altura (cm)", 100, 220, step=1)
+        peso = st.number_input("Peso (kg)", 20, 120, step=1)
+        categoria = st.selectbox("Categoria", ["U8", "U10", "U12", "U14", "U16", "U18"])
 
-# ----- PÁGINA RELATÓRIOS -----
+        if st.button("Salvar Jogador"):
+            novo = pd.DataFrame([[nome, idade, altura, peso, categoria]], columns=dados.columns)
+            dados = pd.concat([dados, novo], ignore_index=True)
+            salvar_dados(dados)
+            st.success("✅ Jogador adicionado com sucesso!")
+
+    st.dataframe(dados)
+
+# ---- TESTES ----
+elif menu == "Sessão de Testes":
+    st.title("🧪 Sessão de Testes Técnicos")
+    st.info("Esta seção será usada para registrar resultados dos testes de passe, condução, agilidade, sprint, reação e remate.")
+    st.markdown("---")
+
+    nome = st.selectbox("Selecione o jogador:", carregar_dados()["Nome"].tolist())
+    tipo_teste = st.selectbox("Tipo de Teste:", ["Passe", "Condução", "Remate", "Sprint", "Agilidade", "Reação"])
+    resultado = st.text_input("Resultado (ex: 15.4s ou 6/6 acertos)")
+    observacao = st.text_area("Observações")
+
+    if st.button("Salvar Resultado"):
+        with open("resultados_testes.csv", "a") as f:
+            f.write(f"{nome},{tipo_teste},{resultado},{observacao},{datetime.now().strftime('%d/%m/%Y')}\n")
+        st.success("✅ Resultado salvo com sucesso!")
+
+# ---- RELATÓRIOS ----
 elif menu == "Relatórios":
-    st.markdown("<h1 class='menu-title'>Relatórios e Comparações</h1>", unsafe_allow_html=True)
-    st.success("📊 Aqui serão gerados relatórios automáticos com IA e PDFs por jogador.")
-
+    st.title("📈 Relatórios e Comparações")
+    st.warning("Em breve: Comparações por idade, relatórios automáticos com IA e plano de desenvolvimento.")
+    st.image("https://cdn-icons-png.flaticon.com/512/5690/5690898.png", width=150)
+    st.markdown("---")
+    st.info("Você poderá em breve gerar relatórios técnicos completos dos jogadores com base nos testes realizados.")
