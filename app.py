@@ -1,96 +1,132 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-from streamlit_option_menu import option_menu
+import datetime
 
+# --- CONFIGURAÇÃO GERAL ---
 st.set_page_config(page_title="IA Soccer Analyse Pro", layout="wide")
 
-# ---- Funções auxiliares ----
-def carregar_dados():
-    try:
-        return pd.read_csv("dados_jogadores.csv")
-    except:
-        return pd.DataFrame(columns=["Nome", "Idade", "Altura", "Peso", "Categoria"])
+# --- MENU LATERAL ---
+menu = st.sidebar.selectbox("Navegação", [
+    "🏠 Dashboard", 
+    "👥 Jogadores", 
+    "🧪 Sessão de Teste", 
+    "📊 Teste Illinois",
+    "📄 Relatórios"
+])
 
-def salvar_dados(df):
-    df.to_csv("dados_jogadores.csv", index=False)
+# --- BANCO DE DADOS FICTÍCIO PARA COMPARAÇÃO ---
+tabela_referencia = {
+    'U8': 21.5,
+    'U10': 19.5,
+    'U12': 18.0,
+    'U14': 17.3,
+    'U16': 16.5,
+    'U18': 16.0,
+    'Sénior': 15.8
+}
 
-# ---- Sidebar com menu ----
-with st.sidebar:
-    menu = option_menu(
-        menu_title="IA Soccer",
-        options=["Dashboard", "Jogadores", "Sessão de Testes", "Relatórios"],
-        icons=["house", "people", "clipboard-data", "bar-chart"],
-        default_index=0,
-        styles={
-            "container": {"padding": "5px", "background-color": "#000814"},
-            "icon": {"color": "white", "font-size": "20px"},
-            "nav-link": {"color": "white", "font-size": "18px", "text-align": "left"},
-            "nav-link-selected": {"background-color": "#003566"},
-        }
-    )
+# --- FUNÇÃO DE ANÁLISE ---
+def analisar_ilinois(tempo, idade):
+    if idade <= 8:
+        ref = tabela_referencia['U8']
+    elif idade <= 10:
+        ref = tabela_referencia['U10']
+    elif idade <= 12:
+        ref = tabela_referencia['U12']
+    elif idade <= 14:
+        ref = tabela_referencia['U14']
+    elif idade <= 16:
+        ref = tabela_referencia['U16']
+    elif idade <= 18:
+        ref = tabela_referencia['U18']
+    else:
+        ref = tabela_referencia['Sénior']
 
-# ---- DASHBOARD ----
-if menu == "Dashboard":
-    st.title("📊 Painel Principal - IA Soccer Analyse Pro")
-    col1, col2, col3 = st.columns(3)
+    diferenca = tempo - ref
 
-    with col1:
-        st.metric("👤 Jogadores Cadastrados", "25")
-    with col2:
-        st.metric("🧪 Testes Realizados", "122")
-    with col3:
-        st.metric("📅 Último Teste", "23/07/2025")
+    if tempo <= ref:
+        nivel = "Elite"
+    elif tempo <= ref + 0.3:
+        nivel = "Muito Bom"
+    elif tempo <= ref + 0.5:
+        nivel = "Bom"
+    elif tempo <= ref + 0.8:
+        nivel = "Médio"
+    else:
+        nivel = "A Melhorar"
 
+    return nivel, ref, diferenca
+
+# --- PLANO DE AÇÃO ---
+def plano_de_acao(nivel):
+    if nivel == "Elite":
+        return "Manutenção do desempenho com foco em prevenção de lesões e mobilidade."
+    elif nivel == "Muito Bom":
+        return "Aprimorar saídas de mudança de direção e reação com estímulos visuais."
+    elif nivel == "Bom":
+        return "Trabalhar explosão inicial e agilidade com circuitos curtos e treino de frenagem."
+    elif nivel == "Médio":
+        return "Melhorar o controle corporal e tempo de reação em mudanças de direção."
+    else:
+        return "Plano intensivo de 8 semanas focado em coordenação, resistência e velocidade lateral."
+
+# --- PÁGINAS ---
+if menu == "🏠 Dashboard":
+    st.title("📊 IA Soccer Analyse Pro")
+    st.subheader("Bem-vindo ao sistema de avaliação técnica e física dos atletas IA Soccer.")
     st.markdown("---")
-    st.subheader("🔍 Últimos Resultados")
-    st.dataframe({
-        "Nome": ["Lucas", "João", "Tracy"],
-        "Teste": ["Agilidade", "Passe", "Remate"],
-        "Nota": ["Muito Bom", "Bom", "A Melhorar"],
-        "Data": ["22/07/2025", "21/07/2025", "20/07/2025"]
-    })
+    st.info("Utilize o menu lateral para navegar pelos testes e análises.")
 
-# ---- JOGADORES ----
-elif menu == "Jogadores":
-    st.title("📋 Base de Dados de Jogadores")
-    dados = carregar_dados()
-
-    with st.expander("➕ Adicionar Novo Jogador"):
+elif menu == "👥 Jogadores":
+    st.title("👥 Registro de Jogadores")
+    with st.form("form_jogador"):
         nome = st.text_input("Nome completo")
-        idade = st.number_input("Idade", 5, 25, step=1)
-        altura = st.number_input("Altura (cm)", 100, 220, step=1)
-        peso = st.number_input("Peso (kg)", 20, 120, step=1)
-        categoria = st.selectbox("Categoria", ["U8", "U10", "U12", "U14", "U16", "U18"])
+        idade = st.number_input("Idade", 6, 25)
+        posicao = st.selectbox("Posição", ["Zagueiro", "Meio-campista", "Atacante", "Goleiro"])
+        submit = st.form_submit_button("Registrar")
+        if submit:
+            st.success(f"Jogador {nome} registrado com sucesso!")
 
-        if st.button("Salvar Jogador"):
-            novo = pd.DataFrame([[nome, idade, altura, peso, categoria]], columns=dados.columns)
-            dados = pd.concat([dados, novo], ignore_index=True)
-            salvar_dados(dados)
-            st.success("✅ Jogador adicionado com sucesso!")
-
-    st.dataframe(dados)
-
-# ---- TESTES ----
-elif menu == "Sessão de Testes":
+elif menu == "🧪 Sessão de Teste":
     st.title("🧪 Sessão de Testes Técnicos")
-    st.info("Esta seção será usada para registrar resultados dos testes de passe, condução, agilidade, sprint, reação e remate.")
-    st.markdown("---")
+    st.warning("Página em desenvolvimento. Em breve, você poderá registrar todos os testes em sequência.")
 
-    nome = st.selectbox("Selecione o jogador:", carregar_dados()["Nome"].tolist())
-    tipo_teste = st.selectbox("Tipo de Teste:", ["Passe", "Condução", "Remate", "Sprint", "Agilidade", "Reação"])
-    resultado = st.text_input("Resultado (ex: 15.4s ou 6/6 acertos)")
-    observacao = st.text_area("Observações")
+elif menu == "📊 Teste Illinois":
+    st.title("📊 Teste de Agilidade - Illinois")
+    with st.form("form_ilinois"):
+        nome = st.text_input("Nome do Atleta")
+        idade = st.number_input("Idade do Atleta", 6, 25)
+        tempo = st.number_input("Tempo do teste (segundos)", 10.0, 30.0, step=0.01)
+        testar = st.form_submit_button("Analisar Desempenho")
 
-    if st.button("Salvar Resultado"):
-        with open("resultados_testes.csv", "a") as f:
-            f.write(f"{nome},{tipo_teste},{resultado},{observacao},{datetime.now().strftime('%d/%m/%Y')}\n")
-        st.success("✅ Resultado salvo com sucesso!")
+    if testar:
+        nivel, ref, diff = analisar_ilinois(tempo, idade)
+        plano = plano_de_acao(nivel)
 
-# ---- RELATÓRIOS ----
-elif menu == "Relatórios":
-    st.title("📈 Relatórios e Comparações")
-    st.warning("Em breve: Comparações por idade, relatórios automáticos com IA e plano de desenvolvimento.")
-    st.image("https://cdn-icons-png.flaticon.com/512/5690/5690898.png", width=150)
-    st.markdown("---")
-    st.info("Você poderá em breve gerar relatórios técnicos completos dos jogadores com base nos testes realizados.")
+        st.success(f"Resultado: {nivel}")
+        st.metric("Tempo Obtido", f"{tempo:.2f}s")
+        st.metric("Tempo de Referência", f"{ref:.2f}s")
+        st.metric("Diferença", f"{diff:+.2f}s")
+
+        st.markdown("---")
+        st.subheader("📈 Comparação com Academias Profissionais")
+        st.markdown("""
+        | Categoria | Tempo Elite |
+        |-----------|--------------|
+        | U8        | 21.5s        |
+        | U10       | 19.5s        |
+        | U12       | 18.0s        |
+        | U14       | 17.3s        |
+        | U16       | 16.5s        |
+        | U18       | 16.0s        |
+        | Sénior    | 15.8s        |
+        """)
+
+        st.markdown("---")
+        st.subheader("📋 Plano de Ação Personalizado")
+        st.info(plano)
+
+elif menu == "📄 Relatórios":
+    st.title("📄 Relatórios e Evolução do Atleta")
+    st.warning("Módulo de relatórios será ativado após os primeiros testes.")
+
