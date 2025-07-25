@@ -1,62 +1,68 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from PIL import Image
 
-st.set_page_config(page_title="IA Soccer Analyse Pro", layout="wide")
+st.set_page_config(
+    page_title="IA Soccer Analyse Pro",
+    page_icon="⚽",
+    layout="wide"
+)
 
-# Sidebar com menu moderno
+# --- SIDEBAR ---
 with st.sidebar:
-    selected = option_menu(
-        menu_title="IA Soccer Analyse Pro",  # título no topo da sidebar
-        options=[
-            "Dashboard", 
-            "Jogadores", 
-            "Sessão de Teste", 
-            "Testes Técnicos", 
-            "Análises Avançadas", 
-            "Relatórios"
-        ],
-        icons=["bar-chart", "person", "clipboard-check", "dribbble", "cpu", "file-earmark-text"],
-        menu_icon="cast",  
+    logo = Image.open("logo.png")  # coloque o logo na mesma pasta ou comente esta linha se ainda não tiver
+    st.image(logo, width=200)
+    st.markdown("## IA Soccer Analyse Pro")
+    
+    menu_principal = option_menu(
+        menu_title=None,
+        options=["Dashboard", "Jogadores", "Sessão de Teste", "Testes Técnicos", "Análises Avançadas", "Relatórios"],
+        icons=["bar-chart", "people", "clipboard-data", "dribbble", "cpu", "file-earmark-bar-graph"],
+        menu_icon="cast",
         default_index=0,
+        orientation="vertical",
         styles={
-            "container": {"padding": "5px", "background-color": "#f0f2f6"},
-            "icon": {"color": "blue", "font-size": "18px"}, 
-            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"5px"},
-            "nav-link-selected": {"background-color": "#4A69BD"},
+            "container": {"padding": "0!important", "background-color": "#0E1117"},
+            "icon": {"color": "white", "font-size": "18px"},
+            "nav-link": {"color": "white", "font-size": "16px", "text-align": "left", "margin":"0px"},
+            "nav-link-selected": {"background-color": "#4B8BF4"},
         }
     )
 
-# Submenu condicional
-if selected == "Testes Técnicos":
-    submenu = st.selectbox("Escolha o teste:", [
-        "Teste Condução (Illinois)",
-        "Teste de Passe",
-        "Remate",
-        "Agilidade",
-        "Sprint",
-        "Reação",
-        "Massa Muscular"
-    ])
-    st.markdown(f"### {submenu}")
+# --- CONTEÚDO PRINCIPAL ---
+st.markdown(f"<h1 style='color: white;'>{menu_principal}</h1>", unsafe_allow_html=True)
 
-elif selected == "Análises Avançadas":
-    submenu = st.selectbox("Escolha a análise:", [
-        "Biomecânica IA",
-        "Análise de Jogo",
-        "Avaliação Mental",
-        "Risco de Lesão"
-    ])
-    st.markdown(f"### {submenu}")
+if menu_principal == "Dashboard":
+    st.info("📊 Bem-vindo ao painel de controle da IA Soccer.")
+    st.write("Aqui você verá os dados resumidos de testes, jogadores e relatórios.")
+    
+elif menu_principal == "Jogadores":
+    st.success("👤 Lista de jogadores registrados.")
+    st.write("Em breve: adicionar, buscar e visualizar jogadores.")
 
-elif selected == "Relatórios":
-    submenu = st.selectbox("Tipo de relatório:", [
-        "Relatório Individual",
-        "Relatório de Sessão",
-        "Comparações por Idade"
-    ])
-    st.markdown(f"### {submenu}")
+elif menu_principal == "Sessão de Teste":
+    st.warning("📝 Criação de sessões de teste.")
+    st.write("Selecione os jogadores e os testes que serão realizados.")
 
-else:
-    st.markdown(f"## {selected}")
-    st.success("Bem-vindo ao módulo selecionado.")
+elif menu_principal == "Testes Técnicos":
+    teste_escolhido = st.selectbox("Escolha o teste:", ["Teste Condução (Illinois)", "Teste de Passe"])
+    st.subheader(teste_escolhido)
+    st.write("Em breve: formulário e análise do teste técnico.")
 
+elif menu_principal == "Análises Avançadas":
+    analise = st.selectbox("Selecione a análise:", ["Biomecânica IA", "Avaliação mental", "Risco de lesão"])
+    st.subheader(analise)
+    st.write("Análise com base em vídeo, IA ou questionários específicos.")
+
+elif menu_principal == "Relatórios":
+    st.info("📑 Geração de relatórios PDF.")
+    st.write("Relatórios técnicos e físicos serão gerados com base nas sessões.")
+
+# --- ESTILO EXTRA (opcional) ---
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 2rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
