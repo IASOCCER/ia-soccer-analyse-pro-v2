@@ -1,5 +1,7 @@
 streamlit
-openai
 pandas
+numpy
+openai
 matplotlib
-reportlab
+plotly
+streamlit-option-menu
